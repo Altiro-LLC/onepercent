@@ -39,6 +39,27 @@ export default function Component() {
   } | null>(null);
   const [editedTaskTitle, setEditedTaskTitle] = useState<string>("");
 
+  const sortProjects = useCallback((projectsToSort: Project[]) => {
+    return [...projectsToSort].sort((a, b) => {
+      const aCompletedToday = a.tasks.some(
+        (task) =>
+          task.completed &&
+          task.completedAt &&
+          isSameDay(new Date(task.completedAt), new Date())
+      );
+      const bCompletedToday = b.tasks.some(
+        (task) =>
+          task.completed &&
+          task.completedAt &&
+          isSameDay(new Date(task.completedAt), new Date())
+      );
+
+      if (aCompletedToday && !bCompletedToday) return 1;
+      if (!aCompletedToday && bCompletedToday) return -1;
+      return 0;
+    });
+  }, []);
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -46,20 +67,20 @@ export default function Component() {
         if (!response.ok) throw new Error("Failed to fetch projects");
         const data = await response.json();
 
-        // Map MongoDB `_id` to `id` for consistency in frontend
         const formattedProjects = data.map((project: Project) => ({
           ...project,
           id: project._id,
         }));
-        console.log("formattedProjects", formattedProjects);
-        setProjects(formattedProjects);
+
+        const sortedProjects = sortProjects(formattedProjects);
+        setProjects(sortedProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
       }
     };
 
     fetchProjects();
-  }, []);
+  }, [sortProjects]);
 
   const addNewProject = useCallback(async () => {
     if (newProjectName.trim() === "") return;
@@ -76,12 +97,15 @@ export default function Component() {
       if (!response.ok) throw new Error("Failed to add project");
       const newProject = await response.json();
 
-      setProjects((prevProjects) => [...prevProjects, newProject]);
+      setProjects((prevProjects) => {
+        const updatedProjects = [...prevProjects, newProject];
+        return sortProjects(updatedProjects);
+      });
       setNewProjectName("");
     } catch (error) {
       console.error("Error adding new project:", error);
     }
-  }, [newProjectName]);
+  }, [newProjectName, sortProjects]);
 
   const addNewTask = useCallback(
     async (projectId: string) => {
@@ -317,9 +341,8 @@ export default function Component() {
         if (!response.ok) throw new Error("Failed to complete task");
 
         const updatedProject = await response.json();
-        console.log("updatedProject", updatedProject);
-        setProjects((prevProjects) =>
-          prevProjects.map((project) =>
+        setProjects((prevProjects) => {
+          const updatedProjects = prevProjects.map((project) =>
             project.id === projectId
               ? {
                   ...project,
@@ -336,16 +359,16 @@ export default function Component() {
                   lastCompletionDate: updatedProject.project.lastCompletionDate,
                 }
               : project
-          )
-        );
-
+          );
+          return sortProjects(updatedProjects);
+        });
         // Update overall streak
         // updateOverallStreak();
       } catch (error) {
         console.error("Error completing task:", error);
       }
     },
-    []
+    [sortProjects]
   );
 
   return (
