@@ -316,6 +316,8 @@ export default function Component() {
 
         if (!response.ok) throw new Error("Failed to complete task");
 
+        const updatedProject = await response.json();
+        console.log("updatedProject", updatedProject);
         setProjects((prevProjects) =>
           prevProjects.map((project) =>
             project.id === projectId
@@ -330,11 +332,15 @@ export default function Component() {
                         }
                       : task
                   ),
-                  streak: completed ? project.streak + 1 : project.streak, // Adjusting streak in the frontend state
+                  streak: updatedProject.project.streak,
+                  lastCompletionDate: updatedProject.project.lastCompletionDate,
                 }
               : project
           )
         );
+
+        // Update overall streak
+        // updateOverallStreak();
       } catch (error) {
         console.error("Error completing task:", error);
       }

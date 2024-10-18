@@ -71,6 +71,7 @@ export async function PUT(req: Request) {
   const db = client.db("onepercent");
 
   try {
+    console.log("PUT");
     const { projectId, taskId, completed, title } = await req.json();
 
     // Build the update object for the task fields.
@@ -186,7 +187,22 @@ export async function PUT(req: Request) {
       }
     );
 
-    return NextResponse.json({ message: "Task updated successfully" });
+    // Update the project's streak.
+    const updatedProject = await db.collection("projects").findOneAndUpdate(
+      { _id: new ObjectId(projectId) },
+      {
+        $set: {
+          streak: newStreak < 0 ? 0 : newStreak, // Ensure streak does not go below 0.
+          lastCompletionDate: newLastCompletionDate,
+        },
+      },
+      { returnOriginal: false }
+    );
+
+    return NextResponse.json({
+      message: "Task updated successfully",
+      project: updatedProject,
+    });
   } catch (error) {
     console.error("Error updating task:", error);
     return NextResponse.json(
