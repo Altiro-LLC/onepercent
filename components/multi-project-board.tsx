@@ -51,7 +51,7 @@ export default function Component() {
           ...project,
           id: project._id,
         }));
-
+        console.log("formattedProjects", formattedProjects);
         setProjects(formattedProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -180,37 +180,6 @@ export default function Component() {
     return () => clearInterval(intervalId);
   }, [updateStreaks]);
 
-  // const toggleTaskCompletion = useCallback(
-  //   (projectId: string, taskId: string) => {
-  //     setProjects((prevProjects) =>
-  //       prevProjects.map((project) => {
-  //         if (project.id === projectId) {
-  //           const updatedTasks = project.tasks.map((task) => {
-  //             if (task.id === taskId) {
-  //               return {
-  //                 ...task,
-  //                 completed: !task.completed,
-  //                 completedAt: !task.completed ? new Date() : null,
-  //               };
-  //             }
-  //             return task;
-  //           });
-
-  //           return {
-  //             ...project,
-  //             tasks: updatedTasks,
-  //           };
-  //         }
-  //         return project;
-  //       })
-  //     );
-
-  //     // Call updateStreaks after toggling task completion
-  //     setTimeout(updateStreaks, 0);
-  //   },
-  //   [updateStreaks]
-  // );
-
   const isTaskCompletedToday = (task: Task) => {
     if (!task.completedAt) return false;
     return isSameDay(new Date(task.completedAt), new Date());
@@ -227,50 +196,6 @@ export default function Component() {
   const isProjectCompletedToday = useCallback((project: Project) => {
     return project.tasks.some(isTaskCompletedToday);
   }, []);
-
-  // const addNewProject = useCallback(() => {
-  //   if (newProjectName.trim() === "") return;
-
-  //   const newProject: Project = {
-  //     id: `${Date.now()}`,
-  //     name: newProjectName.trim(),
-  //     tasks: [],
-  //     streak: 0,
-  //     lastCompletionDate: null,
-  //     showCompleted: false,
-  //   };
-
-  //   setProjects((prevProjects) => [...prevProjects, newProject]);
-  //   setNewProjectName("");
-  // }, [newProjectName]);
-
-  // const addNewTask = useCallback(
-  //   (projectId: string) => {
-  //     const taskTitle = newTasks[projectId]?.trim();
-  //     if (!taskTitle) return;
-
-  //     setProjects((prevProjects) =>
-  //       prevProjects.map((project) => {
-  //         if (project.id === projectId) {
-  //           const newTask: Task = {
-  //             id: `${projectId}-${Date.now()}`,
-  //             title: taskTitle,
-  //             completed: false,
-  //             completedAt: null,
-  //           };
-  //           return {
-  //             ...project,
-  //             tasks: [...project.tasks, newTask],
-  //           };
-  //         }
-  //         return project;
-  //       })
-  //     );
-
-  //     setNewTasks((prev) => ({ ...prev, [projectId]: "" }));
-  //   },
-  //   [newTasks]
-  // );
 
   const handleNewTaskKeyPress = useCallback(
     (e: KeyboardEvent<HTMLInputElement>, projectId: string) => {
@@ -347,20 +272,6 @@ export default function Component() {
     setEditedTaskTitle("");
   }, []);
 
-  // const deleteTask = useCallback((projectId: string, taskId: string) => {
-  //   setProjects((prevProjects) =>
-  //     prevProjects.map((project) => {
-  //       if (project.id === projectId) {
-  //         return {
-  //           ...project,
-  //           tasks: project.tasks.filter((task) => task.id !== taskId),
-  //         };
-  //       }
-  //       return project;
-  //     })
-  //   );
-  // }, []);
-
   const deleteTask = useCallback(async (projectId: string, taskId: string) => {
     try {
       const response = await fetch("/api/tasks", {
@@ -419,6 +330,7 @@ export default function Component() {
                         }
                       : task
                   ),
+                  streak: completed ? project.streak + 1 : project.streak, // Adjusting streak in the frontend state
                 }
               : project
           )
@@ -591,127 +503,3 @@ export default function Component() {
     </div>
   );
 }
-
-// [
-//   {
-//     id: "1",
-//     name: "DMN",
-//     tasks: [
-//       { id: "1-1", title: "Design UI", completed: false, completedAt: null },
-//       {
-//         id: "1-2",
-//         title: "Implement backend",
-//         completed: false,
-//         completedAt: null,
-//       },
-//     ],
-//     streak: 0,
-//     lastCompletionDate: null,
-//     showCompleted: false,
-//   },
-//   {
-//     id: "2",
-//     name: "STATS",
-//     tasks: [
-//       {
-//         id: "2-1",
-//         title: "User research",
-//         completed: false,
-//         completedAt: null,
-//       },
-//       {
-//         id: "2-2",
-//         title: "Create prototype",
-//         completed: false,
-//         completedAt: null,
-//       },
-//     ],
-//     streak: 0,
-//     lastCompletionDate: null,
-//     showCompleted: false,
-//   },
-//   {
-//     id: "3",
-//     name: "Amplifire",
-//     tasks: [
-//       {
-//         id: "3-1",
-//         title: "Data analysis",
-//         completed: false,
-//         completedAt: null,
-//       },
-//       {
-//         id: "3-2",
-//         title: "Report generation",
-//         completed: false,
-//         completedAt: null,
-//       },
-//     ],
-//     streak: 0,
-//     lastCompletionDate: null,
-//     showCompleted: false,
-//   },
-//   {
-//     id: "4",
-//     name: "ChapterBoost",
-//     tasks: [
-//       {
-//         id: "3-1",
-//         title: "Data analysis",
-//         completed: false,
-//         completedAt: null,
-//       },
-//       {
-//         id: "3-2",
-//         title: "Report generation",
-//         completed: false,
-//         completedAt: null,
-//       },
-//     ],
-//     streak: 0,
-//     lastCompletionDate: null,
-//     showCompleted: false,
-//   },
-//   {
-//     id: "5",
-//     name: "Comicfy",
-//     tasks: [
-//       {
-//         id: "3-1",
-//         title: "Data analysis",
-//         completed: false,
-//         completedAt: null,
-//       },
-//       {
-//         id: "3-2",
-//         title: "Report generation",
-//         completed: false,
-//         completedAt: null,
-//       },
-//     ],
-//     streak: 0,
-//     lastCompletionDate: null,
-//     showCompleted: false,
-//   },
-//   {
-//     id: "6",
-//     name: "OnePercent",
-//     tasks: [
-//       {
-//         id: "3-1",
-//         title: "Data analysis",
-//         completed: false,
-//         completedAt: null,
-//       },
-//       {
-//         id: "3-2",
-//         title: "Report generation",
-//         completed: false,
-//         completedAt: null,
-//       },
-//     ],
-//     streak: 0,
-//     lastCompletionDate: null,
-//     showCompleted: false,
-//   },
-// ]
