@@ -82,6 +82,21 @@ export default function Component() {
     fetchProjects();
   }, [sortProjects]);
 
+  useEffect(() => {
+    const fetchOverallStreak = async () => {
+      try {
+        const response = await fetch("/api/overall-streak");
+        if (!response.ok) throw new Error("Failed to fetch overall streak");
+        const data = await response.json();
+        setOverallStreak(data.streak);
+      } catch (error) {
+        console.error("Error fetching overall streak:", error);
+      }
+    };
+
+    fetchOverallStreak();
+  }, []);
+
   const addNewProject = useCallback(async () => {
     if (newProjectName.trim() === "") return;
 
@@ -144,11 +159,20 @@ export default function Component() {
     [newTasks]
   );
 
+  const updateOverallStreak = useCallback(async () => {
+    try {
+      const response = await fetch("/api/overall-streak", { method: "PUT" });
+      if (!response.ok) throw new Error("Failed to update overall streak");
+      const data = await response.json();
+      setOverallStreak(data.streak);
+    } catch (error) {
+      console.error("Error updating overall streak:", error);
+    }
+  }, []);
+
   const updateStreaks = useCallback(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
-    let allProjectsCompletedToday = true;
 
     setProjects((prevProjects) =>
       prevProjects.map((project) => {
@@ -192,10 +216,8 @@ export default function Component() {
       })
     );
 
-    setOverallStreak((prevStreak) =>
-      allProjectsCompletedToday ? prevStreak + 1 : 0
-    );
-  }, []);
+    updateOverallStreak();
+  }, [updateOverallStreak]);
 
   useEffect(() => {
     updateStreaks();
@@ -363,7 +385,11 @@ export default function Component() {
           return sortProjects(updatedProjects);
         });
         // Update overall streak
-        // updateOverallStreak();
+        const overallStreakResponse = await fetch("/api/overall-streak");
+        if (overallStreakResponse.ok) {
+          const overallStreakData = await overallStreakResponse.json();
+          setOverallStreak(overallStreakData.streak);
+        }
       } catch (error) {
         console.error("Error completing task:", error);
       }
