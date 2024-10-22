@@ -94,8 +94,10 @@ export default function Component() {
       }
     };
 
-    fetchOverallStreak();
-  }, []);
+    if (projects.length > 0) {
+      fetchOverallStreak();
+    }
+  }, [projects]);
 
   const addNewProject = useCallback(async () => {
     if (newProjectName.trim() === "") return;
@@ -183,9 +185,9 @@ export default function Component() {
             isSameDay(new Date(task.completedAt), today)
         );
 
-        if (!projectCompletedToday) {
-          allProjectsCompletedToday = false;
-        }
+        // if (!projectCompletedToday) {
+        //   allProjectsCompletedToday = false;
+        // }
 
         if (project.lastCompletionDate) {
           const lastCompletion = new Date(project.lastCompletionDate);
@@ -384,11 +386,16 @@ export default function Component() {
           );
           return sortProjects(updatedProjects);
         });
+
         // Update overall streak
-        const overallStreakResponse = await fetch("/api/overall-streak");
+        const overallStreakResponse = await fetch("/api/overall-streak", {
+          method: "PUT",
+        });
         if (overallStreakResponse.ok) {
           const overallStreakData = await overallStreakResponse.json();
           setOverallStreak(overallStreakData.streak);
+        } else {
+          console.error("Failed to update overall streak");
         }
       } catch (error) {
         console.error("Error completing task:", error);
@@ -400,7 +407,7 @@ export default function Component() {
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Multi-Project Board</h1>
+        <h1 className="text-2xl font-bold">OnePercent</h1>
         <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
           <Trophy className="w-6 h-6 text-yellow-500" />
           <span className="font-bold text-yellow-700 dark:text-yellow-300">
@@ -451,7 +458,7 @@ export default function Component() {
                       : "Showing to-do"}
                   </Label>
                 </div>
-                <ul className="space-y-2">
+                <ul className="space-y-6">
                   {project.tasks
                     .filter((task) => task.completed === project.showCompleted)
                     .map((task) => (
@@ -545,6 +552,7 @@ export default function Component() {
                       handleNewTaskKeyPress(e, project.id.toString())
                     }
                     className="flex-grow"
+                    style={{ backgroundColor: "white" }}
                   />
                   <Button onClick={() => addNewTask(project.id)} size="sm">
                     <PlusCircle className="w-4 h-4" />
