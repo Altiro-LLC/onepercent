@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import Confetti from "react-confetti";
 
 interface Task {
   id: string;
@@ -58,6 +59,7 @@ export default function Component() {
     taskId: string;
   } | null>(null);
   const [editedTaskTitle, setEditedTaskTitle] = useState<string>("");
+  const [isConfetti, setIsConfetti] = useState(false);
 
   const sortProjects = useCallback((projectsToSort: Project[]) => {
     return [...projectsToSort].sort((a, b) => {
@@ -205,7 +207,6 @@ export default function Component() {
         } else if (projectCompletedToday) {
           return { ...project, streak: 1, lastCompletionDate: today };
         }
-
         return project;
       })
     );
@@ -339,6 +340,16 @@ export default function Component() {
 
   const completeTask = useCallback(
     async (projectId: string, taskId: string, completed: boolean) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const allProjectsCompletedToday = projects.every((project) =>
+        project.tasks.some(
+          (task) =>
+            task.completed &&
+            task.completedAt &&
+            isSameDay(new Date(task.completedAt), today)
+        )
+      );
       try {
         const response = await fetch("/api/tasks", {
           method: "PUT",
@@ -374,17 +385,39 @@ export default function Component() {
                 }
               : project
           );
+
+          if (!allProjectsCompletedToday) {
+            // check again if now all projects have at least one task completed
+            const allProjectsCompletedTodayNow = updatedProjects.every(
+              (project) =>
+                project.tasks.some(
+                  (task) =>
+                    task.completed &&
+                    task.completedAt &&
+                    isSameDay(new Date(task.completedAt), today)
+                )
+            );
+
+            if (allProjectsCompletedTodayNow) {
+              console.log("setting isConfetti to true");
+              setIsConfetti(true);
+              setTimeout(() => {
+                setIsConfetti(false);
+              }, 3000);
+            }
+          }
           return sortProjects(updatedProjects);
         });
       } catch (error) {
         console.error("Error completing task:", error);
       }
     },
-    [sortProjects]
+    [sortProjects, projects]
   );
 
   return (
     <div className="container mx-auto p-4">
+      {isConfetti && <Confetti tweenDuration={3000} />}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">OnePercent</h1>
         <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
