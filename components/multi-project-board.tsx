@@ -15,6 +15,14 @@ interface Task {
   title: string;
   completed: boolean;
   completedAt: Date | null;
+  createdAt: Date;
+  lastUpdated?: Date; // Updated whenever the task is edited
+  // recurrence?: {
+  //   frequency: "daily" | "weekly" | "monthly";
+  //   interval: number; // e.g., every 2 days, every 3 weeks
+  //   nextDueDate: Date;
+  //   endDate?: Date; // Optional end date for the recurrence
+  // };
 }
 
 interface Project {
@@ -25,6 +33,19 @@ interface Project {
   streak: number;
   lastCompletionDate: Date | null;
   showCompleted: boolean;
+}
+
+function isTaskStale(task: Task): boolean {
+  const now = new Date();
+  const lastUpdate = task.lastUpdated
+    ? new Date(task.lastUpdated)
+    : new Date(task.createdAt);
+
+  // Calculate the difference in days between now and the last update date.
+  const differenceInTime = now.getTime() - lastUpdate.getTime();
+  const differenceInDays = differenceInTime / (1000 * 3600 * 24); // Convert milliseconds to days
+
+  return differenceInDays > 5 && !task.completed;
 }
 
 export default function Component() {
@@ -509,6 +530,11 @@ export default function Component() {
                             >
                               {task.title}
                             </label>
+                            {isTaskStale(task) && (
+                              <span className="text-red-500 text-xs bg-red-100 p-1 rounded">
+                                Stale
+                              </span>
+                            )}
                             <Button
                               onClick={() =>
                                 startEditingTask(

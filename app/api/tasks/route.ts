@@ -16,6 +16,8 @@ export async function POST(req: Request) {
       title,
       completed: false,
       completedAt: null,
+      createdAt: new Date(),
+      lastUpdated: new Date(),
     };
 
     const result = await db
@@ -83,6 +85,9 @@ export async function PUT(req: Request) {
     if (title) {
       update["tasks.$.title"] = title;
     }
+
+    // Update the `lastUpdated` timestamp
+    update["tasks.$.lastUpdated"] = new Date();
 
     // Find the project to check streak conditions.
     const project = await db.collection("projects").findOne({
