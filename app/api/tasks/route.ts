@@ -204,10 +204,6 @@ export async function PUT(req: Request) {
       { returnOriginal: false }
     );
 
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/overall-streak`, {
-      method: "PUT",
-    });
-
     return NextResponse.json({
       message: "Task updated successfully",
       project: updatedProject,

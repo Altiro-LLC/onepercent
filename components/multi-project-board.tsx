@@ -52,7 +52,6 @@ export default function Component() {
   const [projects, setProjects] = useState<Project[]>([]);
 
   const [newProjectName, setNewProjectName] = useState("");
-  const [overallStreak, setOverallStreak] = useState(0);
   const [newTasks, setNewTasks] = useState<{ [key: string]: string }>({});
   const [editingTask, setEditingTask] = useState<{
     projectId: string;
@@ -102,23 +101,6 @@ export default function Component() {
 
     fetchProjects();
   }, [sortProjects]);
-
-  useEffect(() => {
-    const fetchOverallStreak = async () => {
-      try {
-        const response = await fetch("/api/overall-streak");
-        if (!response.ok) throw new Error("Failed to fetch overall streak");
-        const data = await response.json();
-        setOverallStreak(data.streak);
-      } catch (error) {
-        console.error("Error fetching overall streak:", error);
-      }
-    };
-
-    if (projects.length > 0) {
-      fetchOverallStreak();
-    }
-  }, [projects]);
 
   const addNewProject = useCallback(async () => {
     if (newProjectName.trim() === "") return;
@@ -182,17 +164,6 @@ export default function Component() {
     [newTasks]
   );
 
-  const updateOverallStreak = useCallback(async () => {
-    try {
-      const response = await fetch("/api/overall-streak", { method: "PUT" });
-      if (!response.ok) throw new Error("Failed to update overall streak");
-      const data = await response.json();
-      setOverallStreak(data.streak);
-    } catch (error) {
-      console.error("Error updating overall streak:", error);
-    }
-  }, []);
-
   const updateStreaks = useCallback(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -238,9 +209,7 @@ export default function Component() {
         return project;
       })
     );
-
-    updateOverallStreak();
-  }, [updateOverallStreak]);
+  }, []);
 
   useEffect(() => {
     updateStreaks();
@@ -407,17 +376,6 @@ export default function Component() {
           );
           return sortProjects(updatedProjects);
         });
-
-        // Update overall streak
-        const overallStreakResponse = await fetch("/api/overall-streak", {
-          method: "PUT",
-        });
-        if (overallStreakResponse.ok) {
-          const overallStreakData = await overallStreakResponse.json();
-          setOverallStreak(overallStreakData.streak);
-        } else {
-          console.error("Failed to update overall streak");
-        }
       } catch (error) {
         console.error("Error completing task:", error);
       }
@@ -432,7 +390,7 @@ export default function Component() {
         <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
           <Trophy className="w-6 h-6 text-yellow-500" />
           <span className="font-bold text-yellow-700 dark:text-yellow-300">
-            Overall Streak: {overallStreak}
+            Overall Streak: 0
           </span>
         </div>
       </div>
