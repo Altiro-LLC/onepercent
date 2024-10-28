@@ -4,13 +4,21 @@ import { useState, useEffect, useCallback, KeyboardEvent } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { PlusCircle, Flame, Trophy, Pencil, Trash2 } from "lucide-react";
+import {
+  PlusCircle,
+  Flame,
+  Trophy,
+  Pencil,
+  Trash2,
+  Notebook,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import Confetti from "react-confetti";
 import StaleTasksButton from "./ui/StaleTasksButton";
+import NotesModal from "./ui/NotesModal";
 
 interface Task {
   id: string;
@@ -19,12 +27,6 @@ interface Task {
   completedAt: Date | null;
   createdAt: Date;
   lastUpdated?: Date; // Updated whenever the task is edited
-  // recurrence?: {
-  //   frequency: "daily" | "weekly" | "monthly";
-  //   interval: number; // e.g., every 2 days, every 3 weeks
-  //   nextDueDate: Date;
-  //   endDate?: Date; // Optional end date for the recurrence
-  // };
 }
 
 interface Project {
@@ -35,6 +37,7 @@ interface Project {
   streak: number;
   lastCompletionDate: Date | null;
   showCompleted: boolean;
+  notes?: string;
 }
 
 function isTaskStale(task: Task): boolean {
@@ -61,6 +64,8 @@ export default function Component() {
   } | null>(null);
   const [editedTaskTitle, setEditedTaskTitle] = useState<string>("");
   const [isConfetti, setIsConfetti] = useState(false);
+  const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
 
   const sortProjects = useCallback((projectsToSort: Project[]) => {
     return [...projectsToSort].sort((a, b) => {
@@ -82,6 +87,45 @@ export default function Component() {
       return 0;
     });
   }, []);
+
+  const saveNotes = async (notes: string) => {
+    if (!currentProjectId) return;
+
+    try {
+      // Find the project to get its _id
+      const project = projects.find((p) => p.id === currentProjectId);
+      if (!project?._id) return;
+
+      console.log("Saving notes for project:", project._id); // Add this for debugging
+
+      const response = await fetch(`/api/projects/${project._id}/notes`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notes }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Error response:", errorData); // Add this for debugging
+        throw new Error(`Failed to save notes: ${errorData.message}`);
+      }
+
+      setProjects((prevProjects) =>
+        prevProjects.map((p) =>
+          p.id === currentProjectId ? { ...p, notes } : p
+        )
+      );
+    } catch (error) {
+      console.error("Error saving notes:", error);
+    }
+  };
+
+  const openNotesModal = (projectId: string) => {
+    setCurrentProjectId(projectId);
+    setIsNotesModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -452,11 +496,20 @@ export default function Component() {
             >
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle>{project.name}</CardTitle>
-                <div className="flex items-center space-x-1">
-                  <Flame className="w-4 h-4 text-orange-500" />
-                  <span className="font-bold text-orange-500">
-                    {project.streak}
-                  </span>
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => openNotesModal(project.id)}
+                  >
+                    <Notebook className="w-4 h-4" />
+                  </Button>
+                  <div className="flex items-center space-x-1">
+                    <Flame className="w-4 h-4 text-orange-500" />
+                    <span className="font-bold text-orange-500">
+                      {project.streak}
+                    </span>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
@@ -582,6 +635,16 @@ export default function Component() {
           ))}
         </div>
       </ScrollArea>
+      {currentProjectId && (
+        <NotesModal
+          isOpen={isNotesModalOpen}
+          onClose={() => setIsNotesModalOpen(false)}
+          initialNotes={
+            projects.find((p) => p.id === currentProjectId)?.notes || ""
+          }
+          onSave={saveNotes}
+        />
+      )}
     </div>
   );
 }
