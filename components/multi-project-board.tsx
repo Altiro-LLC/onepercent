@@ -488,131 +488,137 @@ export default function Component() {
           {projects.map((project) => (
             <Card
               key={project.id}
-              className={`${
+              className={`flex flex-col ${
                 isProjectCompletedToday(project)
                   ? "bg-green-100 dark:bg-green-900"
                   : ""
-              } transition-colors duration-300`}
+              } transition-colors duration-300 h-full`}
             >
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle>{project.name}</CardTitle>
-                <div className="flex items-center space-x-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => openNotesModal(project.id)}
-                  >
-                    <Notebook className="w-4 h-4" />
-                  </Button>
-                  <div className="flex items-center space-x-1">
-                    <Flame className="w-4 h-4 text-orange-500" />
-                    <span className="font-bold text-orange-500">
-                      {project.streak}
-                    </span>
+              <div className="flex-grow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle>{project.name}</CardTitle>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => openNotesModal(project.id)}
+                    >
+                      <Notebook className="w-4 h-4" />
+                    </Button>
+                    <div className="flex items-center space-x-1">
+                      <Flame className="w-4 h-4 text-orange-500" />
+                      <span className="font-bold text-orange-500">
+                        {project.streak}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-2 mb-4">
-                  <Switch
-                    id={`show-completed-${project.id}`}
-                    checked={project.showCompleted}
-                    onCheckedChange={() => toggleShowCompleted(project.id)}
-                  />
-                  <Label htmlFor={`show-completed-${project.id}`}>
-                    {project.showCompleted
-                      ? "Showing completed"
-                      : "Showing to-do"}
-                  </Label>
-                </div>
-                <ul className="space-y-6">
-                  {project.tasks
-                    .filter((task) => task.completed === project.showCompleted)
-                    .map((task) => (
-                      <li key={task.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={task.id}
-                          checked={task.completed}
-                          onCheckedChange={() =>
-                            completeTask(project.id, task.id, !task.completed)
-                          }
-                        />
-                        {editingTask?.projectId === project.id &&
-                        editingTask?.taskId === task.id ? (
-                          <div className="flex-grow flex items-center space-x-2">
-                            <Input
-                              value={editedTaskTitle}
-                              onChange={(e) =>
-                                setEditedTaskTitle(e.target.value)
-                              }
-                              onKeyPress={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  saveEditedTask();
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center space-x-2 mb-4">
+                    <Switch
+                      id={`show-completed-${project.id}`}
+                      checked={project.showCompleted}
+                      onCheckedChange={() => toggleShowCompleted(project.id)}
+                    />
+                    <Label htmlFor={`show-completed-${project.id}`}>
+                      {project.showCompleted
+                        ? "Showing completed"
+                        : "Showing to-do"}
+                    </Label>
+                  </div>
+                  <ul className="space-y-6">
+                    {project.tasks
+                      .filter(
+                        (task) => task.completed === project.showCompleted
+                      )
+                      .map((task) => (
+                        <li
+                          key={task.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={task.id}
+                            checked={task.completed}
+                            onCheckedChange={() =>
+                              completeTask(project.id, task.id, !task.completed)
+                            }
+                          />
+                          {editingTask?.projectId === project.id &&
+                          editingTask?.taskId === task.id ? (
+                            <div className="flex-grow flex items-center space-x-2">
+                              <Input
+                                value={editedTaskTitle}
+                                onChange={(e) =>
+                                  setEditedTaskTitle(e.target.value)
                                 }
-                              }}
-                              className="flex-grow"
-                            />
-                            <Button onClick={saveEditedTask} size="sm">
-                              Save
-                            </Button>
-                            <Button
-                              onClick={cancelEditingTask}
-                              size="sm"
-                              variant="outline"
-                            >
-                              Cancel
-                            </Button>
-                          </div>
-                        ) : (
-                          <>
-                            <label
-                              htmlFor={task.id}
-                              className={`flex-grow ${
-                                task.completed
-                                  ? "line-through text-gray-500"
-                                  : ""
-                              }`}
-                            >
-                              {task.title}
-                            </label>
-                            {isTaskStale(task) && (
-                              <span className="text-red-500 text-xs bg-red-100 p-1 rounded">
-                                Stale
-                              </span>
-                            )}
-                            <Button
-                              onClick={() =>
-                                startEditingTask(
-                                  project.id,
-                                  task.id,
-                                  task.title
-                                )
-                              }
-                              size="sm"
-                              variant="ghost"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </Button>
-                            <Button
-                              onClick={() => deleteTask(project.id, task.id)}
-                              size="sm"
-                              variant="ghost"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
-                        {isTaskCompletedToday(task) && (
-                          <span className="text-green-500 text-sm">
-                            Completed today
-                          </span>
-                        )}
-                      </li>
-                    ))}
-                </ul>
+                                onKeyPress={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    saveEditedTask();
+                                  }
+                                }}
+                                className="flex-grow"
+                              />
+                              <Button onClick={saveEditedTask} size="sm">
+                                Save
+                              </Button>
+                              <Button
+                                onClick={cancelEditingTask}
+                                size="sm"
+                                variant="outline"
+                              >
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <>
+                              <label
+                                htmlFor={task.id}
+                                className={`flex-grow ${
+                                  task.completed
+                                    ? "line-through text-gray-500"
+                                    : ""
+                                }`}
+                              >
+                                {task.title}
+                              </label>
+                              {isTaskStale(task) && (
+                                <span className="text-red-500 text-xs bg-red-100 p-1 rounded">
+                                  Stale
+                                </span>
+                              )}
+                              <Button
+                                onClick={() =>
+                                  startEditingTask(
+                                    project.id,
+                                    task.id,
+                                    task.title
+                                  )
+                                }
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={() => deleteTask(project.id, task.id)}
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                          {isTaskCompletedToday(task) && (
+                            <span className="text-green-500 text-sm">
+                              Completed today
+                            </span>
+                          )}
+                        </li>
+                      ))}
+                  </ul>
 
-                <div className="mt-4 flex items-center space-x-2">
+                  {/* <div className="mt-4 flex items-center space-x-2">
                   <Input
                     type="text"
                     placeholder="New task"
@@ -629,8 +635,28 @@ export default function Component() {
                   <Button onClick={() => addNewTask(project.id)} size="sm">
                     <PlusCircle className="w-4 h-4" />
                   </Button>
+                </div> */}
+                </CardContent>
+              </div>
+              <div className="mt-auto p-4 bg-white">
+                <div className="flex items-center space-x-2">
+                  <Input
+                    type="text"
+                    placeholder="New task"
+                    value={newTasks[project.id] || ""}
+                    onChange={(e) =>
+                      setNewTasks({ ...newTasks, [project.id]: e.target.value })
+                    }
+                    onKeyPress={(e) =>
+                      handleNewTaskKeyPress(e, project.id.toString())
+                    }
+                    className="flex-grow"
+                  />
+                  <Button onClick={() => addNewTask(project.id)} size="sm">
+                    <PlusCircle className="w-4 h-4" />
+                  </Button>
                 </div>
-              </CardContent>
+              </div>
             </Card>
           ))}
         </div>
