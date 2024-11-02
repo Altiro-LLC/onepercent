@@ -140,6 +140,7 @@ export default function Component() {
         }));
 
         const sortedProjects = sortProjects(formattedProjects);
+        console.log("sortedProjects", sortedProjects);
         setProjects(sortedProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -638,7 +639,7 @@ export default function Component() {
                 </div> */}
                 </CardContent>
               </div>
-              <div className="mt-auto p-4 bg-white">
+              <div className="mt-auto p-4">
                 <div className="flex items-center space-x-2">
                   <Input
                     type="text"
@@ -650,7 +651,7 @@ export default function Component() {
                     onKeyPress={(e) =>
                       handleNewTaskKeyPress(e, project.id.toString())
                     }
-                    className="flex-grow"
+                    className="flex-grow bg-white"
                   />
                   <Button onClick={() => addNewTask(project.id)} size="sm">
                     <PlusCircle className="w-4 h-4" />
