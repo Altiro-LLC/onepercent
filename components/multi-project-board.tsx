@@ -19,6 +19,7 @@ import { Label } from "@/components/ui/label";
 import Confetti from "react-confetti";
 import StaleTasksButton from "./ui/StaleTasksButton";
 import NotesModal from "./ui/NotesModal";
+import PrioritizeButton from "./ui/PrioritizeButton";
 
 interface Task {
   id: string;
@@ -483,6 +484,7 @@ export default function Component() {
         />
         <Button onClick={addNewProject}>Add Project</Button>
         <StaleTasksButton projects={projects} />
+        <PrioritizeButton projects={projects} />
       </div>
       <ScrollArea className="h-[calc(100vh-12rem)]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
