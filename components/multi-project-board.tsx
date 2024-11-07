@@ -54,6 +54,31 @@ function isTaskStale(task: Task): boolean {
   return differenceInDays > 5 && !task.completed;
 }
 
+function convertUrlsToLinks(text: string): JSX.Element {
+  const urlRegex = /(https?:\/\/[^\s]+)/g;
+  const parts = text.split(urlRegex);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        urlRegex.test(part) ? (
+          <a
+            key={index}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-500 underline"
+          >
+            [link]
+          </a>
+        ) : (
+          part
+        )
+      )}
+    </>
+  );
+}
+
 export default function Component() {
   const [projects, setProjects] = useState<Project[]>([]);
 
@@ -583,7 +608,7 @@ export default function Component() {
                                     : ""
                                 }`}
                               >
-                                {task.title}
+                                {convertUrlsToLinks(task.title)}
                               </label>
                               {isTaskStale(task) && (
                                 <span className="text-red-500 text-xs bg-red-100 p-1 rounded">
