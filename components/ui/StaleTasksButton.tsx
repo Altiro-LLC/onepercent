@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { AlertCircle } from "lucide-react";
+import { Project } from "../multi-project-board";
 
-const StaleTasksButton = ({ projects }) => {
+const StaleTasksButton = ({ projects }: { projects: Project[] }) => {
   const staleTasks = projects.flatMap((project) =>
     project.tasks
       .filter((task) => {

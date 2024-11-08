@@ -20,6 +20,7 @@ import Confetti from "react-confetti";
 import StaleTasksButton from "./ui/StaleTasksButton";
 import NotesModal from "./ui/NotesModal";
 import PrioritizeButton from "./ui/PrioritizeButton";
+import AnimatedCircularProgress from "./ui/AnimatedCircularProgress";
 
 interface Task {
   id: string;
@@ -50,6 +51,7 @@ export interface Project {
   notes?: string;
   priority: number;
   recurringTasks: RecurringTask[];
+  projectHealth: number;
 }
 
 function isTaskStale(task: Task): boolean {
@@ -535,6 +537,7 @@ export default function Component() {
             >
               <div className="flex-grow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <AnimatedCircularProgress value={project.projectHealth} />
                   <CardTitle>{project.name}</CardTitle>
                   <div className="flex items-center space-x-2">
                     <Button

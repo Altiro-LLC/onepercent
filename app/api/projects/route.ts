@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongo";
-import { populateRecurringTasks } from "@/lib/utils";
+import { calculateProjectHealth, populateRecurringTasks } from "@/lib/utils";
 import { Project } from "@/components/multi-project-board";
 
 export async function GET() {
@@ -17,8 +17,11 @@ export async function GET() {
       .find({})
       .toArray();
 
-    // Populate recurring tasks for each project
-    projects.forEach((project) => populateRecurringTasks(project));
+    // Populate recurring tasks for each project and calculate health
+    projects.forEach((project) => {
+      populateRecurringTasks(project);
+      project.projectHealth = calculateProjectHealth(project); // Add health metric
+    });
 
     // Save any modified projects back to the database
     await Promise.all(
@@ -29,6 +32,7 @@ export async function GET() {
             $set: {
               tasks: project.tasks,
               recurringTasks: project.recurringTasks,
+              projectHealth: project.projectHealth,
             },
           }
         );
