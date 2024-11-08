@@ -28,9 +28,18 @@ interface Task {
   completedAt: Date | null;
   createdAt: Date;
   lastUpdated?: Date; // Updated whenever the task is edited
+  recurringTaskId?: string;
 }
 
-interface Project {
+export interface RecurringTask {
+  title: string;
+  intervalDays: number;
+  recurringTaskId: string;
+  lastRunDate: Date | null;
+  completedAt: Date | null;
+}
+
+export interface Project {
   _id: string;
   id: string;
   name: string;
@@ -39,6 +48,8 @@ interface Project {
   lastCompletionDate: Date | null;
   showCompleted: boolean;
   notes?: string;
+  priority: number;
+  recurringTasks: RecurringTask[];
 }
 
 function isTaskStale(task: Task): boolean {

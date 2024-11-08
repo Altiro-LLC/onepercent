@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { List } from "lucide-react";
+import { Project } from "../multi-project-board";
 
 const SortableItem: React.FC<{ id: string; children: React.ReactNode }> = ({
   id,
@@ -54,10 +55,11 @@ const SortableItem: React.FC<{ id: string; children: React.ReactNode }> = ({
   );
 };
 
-interface Project {
-  id: string;
-  name: string;
-}
+// interface Project {
+//   id: string;
+//   name: string;
+//   priority: number;
+// }
 
 interface PrioritizeButtonProps {
   projects: Project[];
@@ -78,7 +80,11 @@ const PrioritizeButton: React.FC<PrioritizeButtonProps> = ({ projects }) => {
   };
 
   useEffect(() => {
-    setProjectList(projects);
+    // Sort projects by their priority
+    const sortedProjectsByPriority = projects.sort(
+      (a, b) => a.priority - b.priority
+    );
+    setProjectList(sortedProjectsByPriority);
   }, [projects]);
 
   return (

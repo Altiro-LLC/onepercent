@@ -3,13 +3,39 @@ import { NextResponse } from "next/server";
 
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongo";
+import { populateRecurringTasks } from "@/lib/utils";
+import { Project } from "@/components/multi-project-board";
 
 export async function GET() {
   const client = await clientPromise;
   const db = client.db("onepercent");
 
   try {
-    const projects = await db.collection("projects").find({}).toArray();
+    // Fetch all projects
+    const projects = await db
+      .collection<Project>("projects")
+      .find({})
+      .toArray();
+
+    // Populate recurring tasks for each project
+    projects.forEach((project) => populateRecurringTasks(project));
+
+    // Save any modified projects back to the database
+    await Promise.all(
+      projects.map(async (project) => {
+        await db.collection("projects").updateOne(
+          { _id: new ObjectId(project._id) },
+          {
+            $set: {
+              tasks: project.tasks,
+              recurringTasks: project.recurringTasks,
+            },
+          }
+        );
+      })
+    );
+
+    // Return updated projects
     return NextResponse.json(projects);
   } catch {
     return NextResponse.json(
