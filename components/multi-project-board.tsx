@@ -11,6 +11,7 @@ import {
   Pencil,
   Trash2,
   Notebook,
+  NotebookPen,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import StaleTasksButton from "./ui/StaleTasksButton";
 import NotesModal from "./ui/NotesModal";
 import PrioritizeButton from "./ui/PrioritizeButton";
 import AnimatedCircularProgress from "./ui/AnimatedCircularProgress";
+import TaskNotesModal from "./ui/TaskNotesModal";
 
 interface Task {
   id: string;
@@ -30,6 +32,7 @@ interface Task {
   createdAt: Date;
   lastUpdated?: Date; // Updated whenever the task is edited
   recurringTaskId?: string;
+  notes?: string;
 }
 
 export interface RecurringTask {
@@ -104,7 +107,9 @@ export default function Component() {
   const [editedTaskTitle, setEditedTaskTitle] = useState<string>("");
   const [isConfetti, setIsConfetti] = useState(false);
   const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+  const [isTaskNotesModalOpen, setIsTaskNotesModalOpen] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
 
   const sortProjects = useCallback((projectsToSort: Project[]) => {
     return [...projectsToSort].sort((a, b) => {
@@ -158,6 +163,41 @@ export default function Component() {
       );
     } catch (error) {
       console.error("Error saving notes:", error);
+    }
+  };
+
+  const updateTaskNotes = async (
+    notes: string,
+    taskId: string,
+    projectId: string
+  ) => {
+    console.log("Updating task:", { notes, taskId, projectId }); // Debug log
+    try {
+      const response = await fetch(`/api/tasks/${taskId}/notes`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ notes, projectId }), // Include projectId in body
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update notes");
+      }
+
+      const data = await response.json();
+
+      // Update local state
+      setProjects((prevProjects) =>
+        prevProjects.map((p) => ({
+          ...p,
+          tasks: p.tasks.map((t) => (t.id === taskId ? { ...t, notes } : t)),
+        }))
+      );
+
+      console.log("Notes updated successfully:", data);
+    } catch (error) {
+      console.error("Error updating notes:", error);
     }
   };
 
@@ -500,6 +540,12 @@ export default function Component() {
     [sortProjects, projects]
   );
 
+  const startEditingTaskNotes = (taskId: string, projectId: string) => {
+    setCurrentProjectId(projectId);
+    setCurrentTaskId(taskId);
+    setIsTaskNotesModalOpen(true);
+  };
+
   return (
     <div className="container mx-auto p-4">
       {isConfetti && <Confetti tweenDuration={3000} />}
@@ -643,6 +689,15 @@ export default function Component() {
                                 <Pencil className="w-4 h-4" />
                               </Button>
                               <Button
+                                onClick={() =>
+                                  startEditingTaskNotes(task.id, project.id)
+                                }
+                                size="sm"
+                                variant="ghost"
+                              >
+                                <NotebookPen className="w-4 h-4" />
+                              </Button>
+                              <Button
                                 onClick={() => deleteTask(project.id, task.id)}
                                 size="sm"
                                 variant="ghost"
@@ -705,12 +760,28 @@ export default function Component() {
       </ScrollArea>
       {currentProjectId && (
         <NotesModal
+          isProject={true}
           isOpen={isNotesModalOpen}
           onClose={() => setIsNotesModalOpen(false)}
           initialNotes={
             projects.find((p) => p.id === currentProjectId)?.notes || ""
           }
           onSave={saveNotes}
+        />
+      )}
+      {currentTaskId && currentProjectId && (
+        <TaskNotesModal
+          currentProjectId={currentProjectId}
+          taskId={currentTaskId}
+          isOpen={isTaskNotesModalOpen}
+          onClose={() => setIsTaskNotesModalOpen(false)}
+          initialNotes={
+            projects
+              .map((p) => p.tasks)
+              .flat()
+              .find((t) => t.id === currentTaskId)?.notes || ""
+          }
+          onSave={updateTaskNotes}
         />
       )}
     </div>

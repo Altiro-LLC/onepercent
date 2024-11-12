@@ -18,6 +18,7 @@ export async function POST(req: Request) {
       completedAt: null,
       createdAt: new Date(),
       lastUpdated: new Date(),
+      notes: "",
     };
 
     const result = await db

@@ -10,32 +10,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 // import { Notebook } from "lucide-react";
 
-interface NotesModalProps {
+interface TaskNotesModalProps {
+  currentProjectId: string;
+  taskId: string;
   isOpen: boolean;
   onClose: () => void;
   initialNotes: string;
-  onSave: (notes: string) => void;
-  isProject: boolean;
+  onSave: (notes: string, taskId: string, projectId: string) => void;
 }
 
-const NotesModal: React.FC<NotesModalProps> = ({
+const TaskNotesModal: React.FC<TaskNotesModalProps> = ({
+  currentProjectId,
   isOpen,
   onClose,
   initialNotes,
   onSave,
+  taskId,
 }) => {
+  console.log("taskId", taskId);
+  //   console.log("currentProjectId", currentProjectId);
   const [notes, setNotes] = React.useState(initialNotes);
 
   const handleSave = async () => {
-    onSave(notes);
+    await onSave(notes, taskId, currentProjectId);
     onClose();
   };
-  console.log("notes", notes);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[525px]">
         <DialogHeader>
-          <DialogTitle>Project Notes</DialogTitle>
+          <DialogTitle>Task Notes</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
           <Textarea
@@ -56,4 +61,4 @@ const NotesModal: React.FC<NotesModalProps> = ({
   );
 };
 
-export default NotesModal;
+export default TaskNotesModal;
