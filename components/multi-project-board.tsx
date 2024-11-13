@@ -24,6 +24,8 @@ import PrioritizeButton from "./ui/PrioritizeButton";
 import AnimatedCircularProgress from "./ui/AnimatedCircularProgress";
 import TaskNotesModal from "./ui/TaskNotesModal";
 
+import { SelectRecurrence } from "./SelectRecurrence";
+
 interface Task {
   id: string;
   title: string;
@@ -110,6 +112,7 @@ export default function Component() {
   const [isTaskNotesModalOpen, setIsTaskNotesModalOpen] = useState(false);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [currentTaskId, setCurrentTaskId] = useState<string | null>(null);
+  const [recurrence, setRecurrence] = useState<number | null>(null);
 
   const sortProjects = useCallback((projectsToSort: Project[]) => {
     return [...projectsToSort].sort((a, b) => {
@@ -205,27 +208,26 @@ export default function Component() {
     setCurrentProjectId(projectId);
     setIsNotesModalOpen(true);
   };
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch("/api/projects");
+      if (!response.ok) throw new Error("Failed to fetch projects");
+      const data = await response.json();
+
+      const formattedProjects = data.map((project: Project) => ({
+        ...project,
+        id: project._id,
+      }));
+
+      const sortedProjects = sortProjects(formattedProjects);
+      console.log("sortedProjects", sortedProjects);
+      setProjects(sortedProjects);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await fetch("/api/projects");
-        if (!response.ok) throw new Error("Failed to fetch projects");
-        const data = await response.json();
-
-        const formattedProjects = data.map((project: Project) => ({
-          ...project,
-          id: project._id,
-        }));
-
-        const sortedProjects = sortProjects(formattedProjects);
-        console.log("sortedProjects", sortedProjects);
-        setProjects(sortedProjects);
-      } catch (error) {
-        console.error("Error fetching projects:", error);
-      }
-    };
-
     fetchProjects();
   }, [sortProjects]);
 
@@ -269,6 +271,7 @@ export default function Component() {
           body: JSON.stringify({
             projectId,
             title: taskTitle,
+            recurrence: recurrence,
           }),
         });
 
@@ -284,11 +287,12 @@ export default function Component() {
         );
 
         setNewTasks((prev) => ({ ...prev, [projectId]: "" }));
+        fetchProjects();
       } catch (error) {
         console.error("Error adding new task:", error);
       }
     },
-    [newTasks]
+    [newTasks, recurrence]
   );
 
   const updateStreaks = useCallback(() => {
@@ -714,25 +718,6 @@ export default function Component() {
                         </li>
                       ))}
                   </ul>
-
-                  {/* <div className="mt-4 flex items-center space-x-2">
-                  <Input
-                    type="text"
-                    placeholder="New task"
-                    value={newTasks[project.id] || ""}
-                    onChange={(e) =>
-                      setNewTasks({ ...newTasks, [project.id]: e.target.value })
-                    }
-                    onKeyPress={(e) =>
-                      handleNewTaskKeyPress(e, project.id.toString())
-                    }
-                    className="flex-grow"
-                    style={{ backgroundColor: "white" }}
-                  />
-                  <Button onClick={() => addNewTask(project.id)} size="sm">
-                    <PlusCircle className="w-4 h-4" />
-                  </Button>
-                </div> */}
                 </CardContent>
               </div>
               <div className="mt-auto p-4">
@@ -749,6 +734,7 @@ export default function Component() {
                     }
                     className="flex-grow bg-white"
                   />
+                  <SelectRecurrence onSelectRecurrence={setRecurrence} />
                   <Button onClick={() => addNewTask(project.id)} size="sm">
                     <PlusCircle className="w-4 h-4" />
                   </Button>

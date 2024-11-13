@@ -4,13 +4,16 @@ import { NextResponse } from "next/server";
 import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongo";
 
+import { v4 as uuidv4 } from "uuid"; // Generate unique IDs for recurring tasks
+
 export async function POST(req: Request) {
   const client = await clientPromise;
   const db = client.db("onepercent");
 
   try {
-    const { projectId, title } = await req.json();
-    console.log("projectId", projectId);
+    const { projectId, title, recurrence } = await req.json();
+
+    // Define the new task data
     const newTask = {
       id: new ObjectId().toString(),
       title,
@@ -21,19 +24,76 @@ export async function POST(req: Request) {
       notes: "",
     };
 
-    const result = await db
-      .collection("projects")
-      .updateOne(
-        { _id: new ObjectId(projectId) },
-        { $push: { tasks: newTask } }
-      );
+    console.log("recurrence", recurrence);
 
-    if (result.modifiedCount === 0) {
-      return NextResponse.json({ error: "Project not found" }, { status: 404 });
+    // Check if the task is a recurring task
+    if (recurrence) {
+      const recurringTask = {
+        title,
+        intervalDays: recurrence,
+        recurringTaskId: uuidv4(), // Unique ID for the recurring task
+        lastRunDate: null,
+        completedAt: null,
+      };
+
+      // Step 1: Check if `recurringTasks` exists or is null
+      const project = await db.collection("projects").findOne({
+        _id: new ObjectId(projectId),
+      });
+
+      if (!project) {
+        return NextResponse.json(
+          { error: "Project not found" },
+          { status: 404 }
+        );
+      }
+
+      // Step 2: Initialize `recurringTasks` as an empty array if it's null or undefined
+      if (!Array.isArray(project.recurringTasks)) {
+        await db
+          .collection("projects")
+          .updateOne(
+            { _id: new ObjectId(projectId) },
+            { $set: { recurringTasks: [] } }
+          );
+      }
+
+      // Step 3: Push the recurring task to `recurringTasks`
+      const result = await db
+        .collection("projects")
+        .updateOne(
+          { _id: new ObjectId(projectId) },
+          { $push: { recurringTasks: recurringTask } }
+        );
+
+      if (result.modifiedCount === 0) {
+        return NextResponse.json(
+          { error: "Project not updated" },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(recurringTask, { status: 201 });
+    } else {
+      // Add a regular task to `tasks`
+      const result = await db
+        .collection("projects")
+        .updateOne(
+          { _id: new ObjectId(projectId) },
+          { $push: { tasks: newTask } }
+        );
+
+      if (result.modifiedCount === 0) {
+        return NextResponse.json(
+          { error: "Project not updated" },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json(newTask, { status: 201 });
     }
-
-    return NextResponse.json(newTask, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Failed to add task:", error);
     return NextResponse.json({ error: "Failed to add task" }, { status: 500 });
   }
 }
