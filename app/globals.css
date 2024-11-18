@@ -76,3 +76,18 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+.attention span {
+  display: inline-block;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+}

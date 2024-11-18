@@ -17,7 +17,7 @@ export function SelectRecurrence({
 }) {
   return (
     <Select onValueChange={(value) => onSelectRecurrence(Number(value))}>
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className="w-[180px] bg-white">
         <SelectValue placeholder="Recurrence" />
       </SelectTrigger>
       <SelectContent>

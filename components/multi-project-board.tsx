@@ -25,8 +25,9 @@ import AnimatedCircularProgress from "./ui/AnimatedCircularProgress";
 import TaskNotesModal from "./ui/TaskNotesModal";
 
 import { SelectRecurrence } from "./SelectRecurrence";
+import TaskChart from "./TaskChartModal";
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
   completed: boolean;
@@ -219,9 +220,9 @@ export default function Component() {
         id: project._id,
       }));
 
-      const sortedProjects = sortProjects(formattedProjects);
-      console.log("sortedProjects", sortedProjects);
-      setProjects(sortedProjects);
+      // const sortedProjects = sortProjects(formattedProjects);
+      // console.log("sortedProjects", sortedProjects);
+      setProjects(formattedProjects);
     } catch (error) {
       console.error("Error fetching projects:", error);
     }
@@ -535,7 +536,7 @@ export default function Component() {
               }, 3000);
             }
           }
-          return sortProjects(updatedProjects);
+          return updatedProjects;
         });
       } catch (error) {
         console.error("Error completing task:", error);
@@ -597,6 +598,7 @@ export default function Component() {
                     >
                       <Notebook className="w-4 h-4" />
                     </Button>
+                    <TaskChart data={project.tasks} />
                     <div className="flex items-center space-x-1">
                       <Flame className="w-4 h-4 text-orange-500" />
                       <span className="font-bold text-orange-500">
@@ -675,9 +677,22 @@ export default function Component() {
                                 {convertUrlsToLinks(task.title)}
                               </label>
                               {isTaskStale(task) && (
-                                <span className="text-red-500 text-xs bg-red-100 p-1 rounded">
-                                  Stale
-                                </span>
+                                <>
+                                  <div
+                                    className="icon attention"
+                                    onClick={() =>
+                                      startEditingTask(
+                                        project.id,
+                                        task.id,
+                                        task.title
+                                      )
+                                    }
+                                  >
+                                    <span className="icon attention text-red-500 text-xs bg-red-100 p-1 rounded ">
+                                      Stale
+                                    </span>
+                                  </div>
+                                </>
                               )}
                               <Button
                                 onClick={() =>
