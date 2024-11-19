@@ -26,6 +26,7 @@ import TaskNotesModal from "./ui/TaskNotesModal";
 
 import { SelectRecurrence } from "./SelectRecurrence";
 import TaskChart from "./TaskChartModal";
+import { SignedIn, UserButton } from "@clerk/nextjs";
 
 export interface Task {
   id: string;
@@ -556,12 +557,24 @@ export default function Component() {
       {isConfetti && <Confetti tweenDuration={3000} />}
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">OnePercent</h1>
-        <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
+        <div className="flex items-center">
+          <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
+            <Trophy className="w-6 h-6 text-yellow-500" />
+            <span className="font-bold text-yellow-700 dark:text-yellow-300">
+              Overall Streak: 0
+            </span>
+          </div>
+          <SignedIn>
+            <UserButton />
+          </SignedIn>
+        </div>
+
+        {/* <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
           <Trophy className="w-6 h-6 text-yellow-500" />
           <span className="font-bold text-yellow-700 dark:text-yellow-300">
             Overall Streak: 0
           </span>
-        </div>
+        </div> */}
       </div>
       <div className="mb-4 flex space-x-2">
         <Input
