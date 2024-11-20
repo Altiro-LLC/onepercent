@@ -221,9 +221,14 @@ export default function Component() {
         id: project._id,
       }));
 
+      const sortedProjectsByPriority = formattedProjects.sort(
+        (a: { priority: number }, b: { priority: number }) =>
+          a.priority - b.priority
+      );
+
       // const sortedProjects = sortProjects(formattedProjects);
       // console.log("sortedProjects", sortedProjects);
-      setProjects(formattedProjects);
+      setProjects(sortedProjectsByPriority);
     } catch (error) {
       console.error("Error fetching projects:", error);
     }
@@ -586,7 +591,7 @@ export default function Component() {
         />
         <Button onClick={addNewProject}>Add Project</Button>
         <StaleTasksButton projects={projects} />
-        <PrioritizeButton projects={projects} />
+        <PrioritizeButton projects={projects} fetchProjects={fetchProjects} />
       </div>
       <ScrollArea className="h-[calc(100vh-12rem)]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
