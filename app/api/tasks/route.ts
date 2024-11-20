@@ -5,6 +5,7 @@ import { ObjectId } from "mongodb";
 import clientPromise from "@/lib/mongo";
 
 import { v4 as uuidv4 } from "uuid"; // Generate unique IDs for recurring tasks
+import { Task } from "@/components/multi-project-board";
 
 export async function POST(req: Request) {
   const client = await clientPromise;
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
 
       // Step 1: Check if `recurringTasks` exists or is null
       const project = await db.collection("projects").findOne({
-        _id: new ObjectId(projectId),
+        _id: ObjectId.createFromHexString(projectId),
       });
 
       if (!project) {
@@ -53,18 +54,17 @@ export async function POST(req: Request) {
         await db
           .collection("projects")
           .updateOne(
-            { _id: new ObjectId(projectId) },
+            { _id: ObjectId.createFromHexString(projectId) },
             { $set: { recurringTasks: [] } }
           );
       }
 
       // Step 3: Push the recurring task to `recurringTasks`
-      const result = await db
-        .collection("projects")
-        .updateOne(
-          { _id: new ObjectId(projectId) },
-          { $push: { recurringTasks: recurringTask } }
-        );
+      const result = await db.collection("projects").updateOne(
+        { _id: ObjectId.createFromHexString(projectId) },
+        // @ts-expect-error `recurringTasks` is initialized above
+        { $push: { recurringTasks: recurringTask } }
+      );
 
       if (result.modifiedCount === 0) {
         return NextResponse.json(
@@ -76,12 +76,11 @@ export async function POST(req: Request) {
       return NextResponse.json(recurringTask, { status: 201 });
     } else {
       // Add a regular task to `tasks`
-      const result = await db
-        .collection("projects")
-        .updateOne(
-          { _id: new ObjectId(projectId) },
-          { $push: { tasks: newTask } }
-        );
+      const result = await db.collection("projects").updateOne(
+        { _id: new ObjectId(projectId) },
+        // @ts-expect-error `tasks` is initialized above
+        { $push: { tasks: newTask } }
+      );
 
       if (result.modifiedCount === 0) {
         return NextResponse.json(
@@ -105,12 +104,11 @@ export async function DELETE(req: Request) {
   try {
     const { projectId, taskId } = await req.json();
 
-    const result = await db
-      .collection("projects")
-      .updateOne(
-        { _id: new ObjectId(projectId) },
-        { $pull: { tasks: { id: taskId } } }
-      );
+    const result = await db.collection("projects").updateOne(
+      { _id: new ObjectId(projectId) },
+      // @ts-expect-error `tasks` is initialized above
+      { $pull: { tasks: { id: taskId } } }
+    );
 
     if (result.modifiedCount === 0) {
       return NextResponse.json(
@@ -138,7 +136,7 @@ export async function PUT(req: Request) {
     const { projectId, taskId, completed, title } = await req.json();
 
     // Build the update object for the task fields.
-    const update: any = {};
+    const update: { [key: string]: unknown } = {};
     if (typeof completed === "boolean") {
       update["tasks.$.completed"] = completed;
       update["tasks.$.completedAt"] = completed ? new Date() : null;
@@ -167,7 +165,7 @@ export async function PUT(req: Request) {
       : null;
 
     const hasTaskCompletedToday = project.tasks.some(
-      (task) =>
+      (task: Task) =>
         task.completed &&
         task.completedAt &&
         isSameDay(new Date(task.completedAt), today)
@@ -200,7 +198,7 @@ export async function PUT(req: Request) {
     } else {
       // If marking a task as incomplete and it was completed today, adjust the streak.
       const wasCompletedToday = project.tasks.find(
-        (task) =>
+        (task: Task) =>
           task.id === taskId &&
           task.completedAt &&
           isSameDay(new Date(task.completedAt), today)
@@ -209,7 +207,7 @@ export async function PUT(req: Request) {
       if (wasCompletedToday) {
         // Check if there are any other tasks completed today.
         const otherTasksCompletedToday = project.tasks.some(
-          (task) =>
+          (task: Task) =>
             task.id !== taskId &&
             task.completed &&
             task.completedAt &&
@@ -262,6 +260,7 @@ export async function PUT(req: Request) {
           lastCompletionDate: newLastCompletionDate,
         },
       },
+      // @ts-expect-error `returnOriginal` is a valid option
       { returnOriginal: false }
     );
 

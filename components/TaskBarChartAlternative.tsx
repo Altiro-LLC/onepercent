@@ -16,11 +16,7 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
-interface Task {
-  id: string;
-  completedAt: string | null;
-}
+import { Task } from "./multi-project-board";
 
 const transformData = (data: Task[]) => {
   const grouped = data.reduce<Record<string, number>>((acc, task) => {

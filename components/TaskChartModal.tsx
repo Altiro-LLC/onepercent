@@ -2,15 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { BarChart } from "lucide-react";
-import TaskLineChart from "./TaskLineChart";
 import { Task } from "./multi-project-board";
 import { TaskCompletionChart } from "./TaskBarChartAlternative";
 
@@ -34,7 +27,6 @@ export default function TaskChartModal({ data }: TaskChartModalProps) {
         </DialogHeader> */}
         <div className="py-4">
           {/* Add your chart component here */}
-          {/* <TaskLineChart data={data} /> */}
           <TaskCompletionChart data={data} />
         </div>
       </DialogContent>
