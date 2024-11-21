@@ -213,6 +213,7 @@ export default function Component() {
   };
   const fetchProjects = async () => {
     try {
+      console.log("fetching projects");
       const response = await fetch(`/api/projects?userId=${user?.id}`);
       if (!response.ok) throw new Error("Failed to fetch projects");
       const data = await response.json();
@@ -234,8 +235,8 @@ export default function Component() {
   };
 
   useEffect(() => {
-    fetchProjects();
-  }, [sortProjects]);
+    if (user.id) fetchProjects();
+  }, [sortProjects, user]);
 
   const addNewProject = useCallback(async () => {
     if (newProjectName.trim() === "") return;
