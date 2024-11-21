@@ -235,7 +235,7 @@ export default function Component() {
   };
 
   useEffect(() => {
-    if (user.id) fetchProjects();
+    if (user?.id) fetchProjects();
   }, [sortProjects, user]);
 
   const addNewProject = useCallback(async () => {
