@@ -60,7 +60,7 @@ export default async function handler(
     console.error("Error verifying webhook:", err);
     return res.status(400).json({ Error: err });
   }
-
+  // Whatever
   // Do something with the payload
   // For this guide, you simply log the payload to the console
   // const { id } = evt.data;
