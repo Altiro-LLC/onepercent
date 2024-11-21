@@ -7,11 +7,11 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   PlusCircle,
   Flame,
-  Trophy,
   Pencil,
   Trash2,
   Notebook,
   NotebookPen,
+  Trophy,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,9 @@ import TaskNotesModal from "./ui/TaskNotesModal";
 import { SelectRecurrence } from "./SelectRecurrence";
 import TaskChart from "./TaskChartModal";
 import { SignedIn, UserButton, useUser } from "@clerk/nextjs";
+import FeatureRequestButton from "./FeatureRequestButton";
+// import { useRouter } from "next/navigation";
+import { withAuthRedirect } from "@/hooks/withAuthRedirect";
 
 export interface Task {
   id: string;
@@ -99,8 +102,9 @@ function convertUrlsToLinks(text: string): JSX.Element {
   );
 }
 
-export default function Component() {
+const Component = () => {
   const { user } = useUser();
+  // const router = useRouter();
   const [projects, setProjects] = useState<Project[]>([]);
 
   const [newProjectName, setNewProjectName] = useState("");
@@ -234,9 +238,16 @@ export default function Component() {
     }
   };
 
+  // useEffect(() => {
+  //   if (!user?.id) {
+  //     // Navigate to login page if not logged in
+  //     router.push("/");
+  //   }
+  // }, [user]);
+
   useEffect(() => {
-    if (user?.id) fetchProjects();
-  }, [sortProjects, user]);
+    fetchProjects();
+  }, [sortProjects]);
 
   const addNewProject = useCallback(async () => {
     if (newProjectName.trim() === "") return;
@@ -581,7 +592,7 @@ export default function Component() {
           </span>
         </div> */}
       </div>
-      <div className="mb-4 flex space-x-2">
+      <div className="mb-4 flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
         <Input
           type="text"
           placeholder="New project name"
@@ -592,6 +603,7 @@ export default function Component() {
         <Button onClick={addNewProject}>Add Project</Button>
         <StaleTasksButton projects={projects} />
         <PrioritizeButton projects={projects} fetchProjects={fetchProjects} />
+        <FeatureRequestButton />
       </div>
       <ScrollArea className="h-[calc(100vh-12rem)]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -805,4 +817,7 @@ export default function Component() {
       )}
     </div>
   );
-}
+};
+const AuthenticatedComponent = withAuthRedirect(Component);
+
+export default AuthenticatedComponent;
