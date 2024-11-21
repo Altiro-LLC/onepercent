@@ -1,27 +1,15 @@
 import clientPromise from "@/lib/mongo";
 import { WebhookEvent } from "@clerk/nextjs/server";
-import { buffer } from "micro";
-import { NextApiRequest, NextApiResponse } from "next";
+
 import { Webhook } from "svix";
+import { NextRequest, NextResponse } from "next/server";
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+// Replace the deprecated export for API config
+export const dynamic = "force-dynamic"; // For dynamic routes in Next.js
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+export async function POST(req: NextRequest) {
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
 
-  // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
-  console.log(process.env.WEBHOOK_SECRET);
-  const { WEBHOOK_SECRET } = process.env;
-  console.log("WEBHOOK_SECRET: ", WEBHOOK_SECRET);
   if (!WEBHOOK_SECRET) {
     throw new Error(
       "Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local"
@@ -29,27 +17,26 @@ export default async function handler(
   }
 
   // Get the Svix headers for verification
-  const svixId = req.headers["svix-id"] as string;
-  const svixTimestamp = req.headers["svix-timestamp"] as string;
-  const svixSignature = req.headers["svix-signature"] as string;
+  const svixId = req.headers.get("svix-id");
+  const svixTimestamp = req.headers.get("svix-timestamp");
+  const svixSignature = req.headers.get("svix-signature");
 
-  // If there are no headers, error out
+  // Ensure headers are present
   if (!svixId || !svixTimestamp || !svixSignature) {
-    return res.status(400).json({ error: "Error occured -- no svix headers" });
+    return NextResponse.json(
+      { error: "Error occurred -- no Svix headers" },
+      { status: 400 }
+    );
   }
 
-  console.log("headers", req.headers, svixId, svixSignature, svixTimestamp);
-  // Get the body
-  const body = (await buffer(req)).toString();
+  const body = await req.text();
 
-  // Create a new Svix instance with your secret.
+  // Create a new Svix instance with your secret
   const wh = new Webhook(WEBHOOK_SECRET);
 
   let evt: WebhookEvent;
 
-  // Attempt to verify the incoming webhook
-  // If successful, the payload will be available from 'evt'
-  // If the verification fails, error out and  return error code
+  // Verify the webhook
   try {
     evt = wh.verify(body, {
       "svix-id": svixId,
@@ -58,17 +45,15 @@ export default async function handler(
     }) as WebhookEvent;
   } catch (err) {
     console.error("Error verifying webhook:", err);
-    return res.status(400).json({ Error: err });
+    return NextResponse.json(
+      { error: "Invalid webhook signature" },
+      { status: 400 }
+    );
   }
-  // Whatever
-  // Do something with the payload
-  // For this guide, you simply log the payload to the console
-  // const { id } = evt.data;
-  // const eventType = evt.type;
+
   if (evt.type === "user.created") {
     const userId = evt.data.id;
     const userEmail = evt.data.email_addresses[0]?.email_address;
-    // const userName = `${evt.data.first_name} ${evt.data.last_name}`;
     const firstName = evt.data.first_name;
     const lastName = evt.data.last_name;
 
@@ -88,13 +73,13 @@ export default async function handler(
 
       console.log(`User ${userId} has been created.`);
     } catch (err) {
-      console.error(
-        "Error creating Stripe customer or subscription or Clerk user:",
-        err
+      console.error("Error saving user in MongoDB:", err);
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
       );
-      return res.status(500).json({ error: "Internal server error" });
     }
   }
 
-  return res.status(200).json({ response: "Success" });
+  return NextResponse.json({ response: "Success" });
 }
