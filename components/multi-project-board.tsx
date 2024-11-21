@@ -30,6 +30,7 @@ import { SignedIn, UserButton, useUser } from "@clerk/nextjs";
 import FeatureRequestButton from "./FeatureRequestButton";
 // import { useRouter } from "next/navigation";
 import { withAuthRedirect } from "@/hooks/withAuthRedirect";
+import { BetaTag } from "./BetaTag";
 
 export interface Task {
   id: string;
@@ -572,7 +573,11 @@ const Component = () => {
     <div className="container mx-auto p-4">
       {isConfetti && <Confetti tweenDuration={3000} />}
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">OnePercent</h1>
+        <h1 className="text-2xl font-bold flex items-center space-x-2">
+          <span>OnePercent</span>
+          <BetaTag />
+        </h1>
+
         <div className="flex items-center">
           <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
             <Trophy className="w-6 h-6 text-yellow-500" />

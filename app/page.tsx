@@ -17,6 +17,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { SignUpButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
+import { BetaTag } from "@/components/BetaTag";
 
 export default function Component() {
   const router = useRouter();
@@ -61,6 +62,7 @@ export default function Component() {
         <div className="container flex items-center justify-between">
           <Link className="flex items-center justify-center" href="#">
             <span className="text-lg font-bold">OnePercent</span>
+            <BetaTag />
           </Link>
           <nav className="flex gap-4 sm:gap-6 items-center">
             <Link
