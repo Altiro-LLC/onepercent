@@ -26,7 +26,7 @@ import TaskNotesModal from "./ui/TaskNotesModal";
 
 import { SelectRecurrence } from "./SelectRecurrence";
 import TaskChart from "./TaskChartModal";
-import { SignedIn, UserButton } from "@clerk/nextjs";
+import { SignedIn, UserButton, useUser } from "@clerk/nextjs";
 
 export interface Task {
   id: string;
@@ -100,6 +100,7 @@ function convertUrlsToLinks(text: string): JSX.Element {
 }
 
 export default function Component() {
+  const { user } = useUser();
   const [projects, setProjects] = useState<Project[]>([]);
 
   const [newProjectName, setNewProjectName] = useState("");
@@ -212,7 +213,7 @@ export default function Component() {
   };
   const fetchProjects = async () => {
     try {
-      const response = await fetch("/api/projects");
+      const response = await fetch(`/api/projects?userId=${user?.id}`);
       if (!response.ok) throw new Error("Failed to fetch projects");
       const data = await response.json();
 
@@ -226,8 +227,6 @@ export default function Component() {
           a.priority - b.priority
       );
 
-      // const sortedProjects = sortProjects(formattedProjects);
-      // console.log("sortedProjects", sortedProjects);
       setProjects(sortedProjectsByPriority);
     } catch (error) {
       console.error("Error fetching projects:", error);
@@ -247,7 +246,7 @@ export default function Component() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name: newProjectName.trim() }),
+        body: JSON.stringify({ name: newProjectName.trim(), userId: user?.id }),
       });
 
       if (!response.ok) throw new Error("Failed to add project");

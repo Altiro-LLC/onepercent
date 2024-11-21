@@ -6,15 +6,26 @@ import clientPromise from "@/lib/mongo";
 import { calculateProjectHealth, populateRecurringTasks } from "@/lib/utils";
 import { Project } from "@/components/multi-project-board";
 
-export async function GET() {
+export async function GET(req: Request) {
   const client = await clientPromise;
   const db = client.db("onepercent");
 
   try {
-    // Fetch all projects
+    // Parse query parameters
+    const url = new URL(req.url);
+    const userId = url.searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Missing userId parameter" },
+        { status: 400 }
+      );
+    }
+
+    // Fetch projects belonging to the user
     const projects = await db
       .collection<Project>("projects")
-      .find({})
+      .find({ userId })
       .toArray();
 
     // Populate recurring tasks for each project and calculate health
@@ -41,7 +52,8 @@ export async function GET() {
 
     // Return updated projects
     return NextResponse.json(projects);
-  } catch {
+  } catch (error) {
+    console.error("Error fetching projects:", error);
     return NextResponse.json(
       { error: "Failed to fetch projects" },
       { status: 500 }
@@ -54,9 +66,18 @@ export async function POST(req: Request) {
   const db = client.db("onepercent");
 
   try {
-    const { name } = await req.json();
+    const { name, userId } = await req.json();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Missing userId in request body" },
+        { status: 400 }
+      );
+    }
+
     const newProject = {
       name,
+      userId,
       tasks: [],
       streak: 0,
       lastCompletionDate: null,
@@ -68,7 +89,8 @@ export async function POST(req: Request) {
       .collection("projects")
       .findOne({ _id: result.insertedId });
     return NextResponse.json(insertedProject, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error("Error creating project:", error);
     return NextResponse.json(
       { error: "Failed to create project" },
       { status: 500 }

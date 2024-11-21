@@ -16,13 +16,19 @@ import {
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { SignUpButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 
 export default function Component() {
+  const router = useRouter();
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
   }, []);
+
+  const navigateToMultiProjectBoard = () => {
+    router.push("/multi-project-board");
+  };
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -76,10 +82,15 @@ export default function Component() {
               About
             </Link>
             <SignedIn>
-              <Button className="bg-green-600 hover:bg-green-700">Home</Button>
+              <Button
+                onClick={navigateToMultiProjectBoard}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                Home
+              </Button>
             </SignedIn>
             <SignedOut>
-              <SignInButton>
+              <SignInButton forceRedirectUrl={"/multi-project-board"}>
                 <Button className="bg-green-600 hover:bg-green-700">
                   Login
                 </Button>
