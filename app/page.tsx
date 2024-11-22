@@ -92,7 +92,7 @@ export default function Component() {
               </Button>
             </SignedIn>
             <SignedOut>
-              <SignInButton forceRedirectUrl={"/multi-project-board"}>
+              <SignInButton>
                 <Button className="bg-green-600 hover:bg-green-700">
                   Login
                 </Button>
@@ -121,7 +121,7 @@ export default function Component() {
               </motion.div>
               <motion.div className="space-x-4" variants={itemVariants}>
                 {/* redirect to /multi-project-board after signup */}
-                <SignUpButton forceRedirectUrl={"/multi-project-board"}>
+                <SignUpButton>
                   <Button className="bg-green-600 hover:bg-green-700">
                     Get Started
                   </Button>
