@@ -12,6 +12,7 @@ import {
   Notebook,
   NotebookPen,
   Trophy,
+  Target,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,13 @@ import FeatureRequestButton from "./FeatureRequestButton";
 // import { useRouter } from "next/navigation";
 import { withAuthRedirect } from "@/hooks/withAuthRedirect";
 import { BetaTag } from "./BetaTag";
+import { hasEnoughDataForChart } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export interface Task {
   id: string;
@@ -579,12 +587,12 @@ const Component = () => {
         </h1>
 
         <div className="flex items-center">
-          <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
+          {/* <div className="flex items-center space-x-2 bg-yellow-100 dark:bg-yellow-900 px-4 py-2 rounded-full">
             <Trophy className="w-6 h-6 text-yellow-500" />
             <span className="font-bold text-yellow-700 dark:text-yellow-300">
               Overall Streak: 0
             </span>
-          </div>
+          </div> */}
           <SignedIn>
             <UserButton />
           </SignedIn>
@@ -633,13 +641,24 @@ const Component = () => {
                     >
                       <Notebook className="w-4 h-4" />
                     </Button>
-                    <TaskChart data={project.tasks} />
-                    <div className="flex items-center space-x-1">
+                    {hasEnoughDataForChart(project.tasks) && (
+                      <TooltipProvider>
+                        <Tooltip delayDuration={0}>
+                          <TooltipTrigger>
+                            <TaskChart data={project.tasks} />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Task Performance Chart</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    )}
+                    {/* <div className="flex items-center space-x-1">
                       <Flame className="w-4 h-4 text-orange-500" />
                       <span className="font-bold text-orange-500">
                         {project.streak}
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -655,6 +674,20 @@ const Component = () => {
                         : "Showing to-do"}
                     </Label>
                   </div>
+                  {project.name === "Comicfy" && (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <Target className="h-5 w-5 text-purple-500" />
+                        <span className="font-semibold">Project Goal</span>
+                      </div>
+                      <p
+                        className="text-sm text-muted-foreground"
+                        style={{ marginBottom: "10px" }}
+                      >
+                        {project.goals[0].title}
+                      </p>
+                    </>
+                  )}
                   <ul className="space-y-6">
                     {project.tasks
                       .filter(

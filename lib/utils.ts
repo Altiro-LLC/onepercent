@@ -1,4 +1,4 @@
-import { Project } from "@/components/multi-project-board";
+import { Project, Task } from "@/components/multi-project-board";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -75,4 +75,27 @@ export function calculateProjectHealth(project: Project): number {
   const health = totalTasks > 0 ? 100 - (staleTasks / totalTasks) * 100 : 100; // Default to 100% if no tasks
 
   return Math.max(health, 0); // Ensure health is never negative
+}
+
+export function hasEnoughDataForChart(tasks: Task[]): boolean {
+  // Get date 2 weeks ago
+  const twoWeeksAgo = new Date();
+  twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+  // Filter completed tasks within last 2 weeks
+  const recentCompletedTasks = tasks.filter((task) => {
+    if (!task.completedAt) return false;
+    const completedDate = new Date(task.completedAt);
+    return completedDate >= twoWeeksAgo;
+  });
+
+  // Get unique dates when tasks were completed
+  const uniqueCompletionDates = new Set(
+    recentCompletedTasks.map(
+      (task) => new Date(task.completedAt!).toISOString().split("T")[0]
+    )
+  );
+
+  // Return true if we have data for at least 3 different days in the last 2 weeks
+  return uniqueCompletionDates.size >= 3;
 }
