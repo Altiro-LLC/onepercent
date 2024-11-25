@@ -6,12 +6,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   PlusCircle,
-  Flame,
   Pencil,
   Trash2,
   Notebook,
   NotebookPen,
-  Trophy,
   Target,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -58,6 +56,20 @@ export interface RecurringTask {
   lastRunDate: Date | null;
   completedAt: Date | null;
 }
+type GoalStatus = "in-progress" | "completed" | "not-started";
+export type Goal = {
+  id: string;
+  title: string;
+  description: string;
+  target: number;
+  progress: number;
+  unit: string;
+  status: GoalStatus;
+  recurringTasks: RecurringTask[];
+  createdAt: Date;
+  lastUpdated: Date;
+  completedAt: Date | null;
+};
 
 export interface Project {
   _id: string;
@@ -71,6 +83,7 @@ export interface Project {
   priority: number;
   recurringTasks: RecurringTask[];
   projectHealth: number;
+  goals: Goal[];
 }
 
 function isTaskStale(task: Task): boolean {
