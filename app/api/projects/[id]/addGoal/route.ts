@@ -10,9 +10,10 @@ export async function POST(req: Request) {
   const db = client.db("onepercent");
 
   try {
-    const { projectId, title, description, target, unit } = await req.json();
+    const { projectId, title, description, throughput } = await req.json();
 
-    if (!projectId || !title || !description || !target || !unit) {
+    // Validate required fields
+    if (!projectId || !title || !description || throughput === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -26,25 +27,27 @@ export async function POST(req: Request) {
       id: goalId,
       title,
       description,
-      target,
-      progress: 0, // Initialize progress
-      unit,
-      status: "in-progress", // Default status
+      throughput,
+      progress: 0,
+      status: "in-progress",
       recurringTasks: [],
+      tasks: [],
       createdAt: new Date(),
       lastUpdated: new Date(),
       completedAt: null,
     };
 
-    // Update the project document, creating the `goals` array if it doesn't exist
+    // Step 1: Ensure the `goals` field exists and is an array
+    await db.collection("projects").updateOne(
+      { _id: new ObjectId(projectId) },
+      { $setOnInsert: { goals: [] } }, // Initialize goals if it doesn't exist
+      { upsert: true } // Ensure the document exists
+    );
+
+    // Step 2: Push the new goal into the `goals` array
     const updateResult = await db.collection("projects").updateOne(
       { _id: new ObjectId(projectId) },
-      {
-        $setOnInsert: { goals: [] }, // Initialize `goals` if not present
-        // @ts-expect-error - TypeScript doesn't recognize the $push operator
-        $push: { goals: newGoal }, // Add the new goal
-      },
-      { upsert: true } // Create the project if it doesn't exist (optional)
+      { $push: { goals: newGoal } } // Add the new goal
     );
 
     if (updateResult.modifiedCount === 0 && updateResult.upsertedCount === 0) {

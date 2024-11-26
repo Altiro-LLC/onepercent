@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, KeyboardEvent } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -37,6 +43,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { GoalSettingModal } from "./GoalSettingModal";
 
 export interface Task {
   id: string;
@@ -644,16 +651,23 @@ const Component = () => {
             >
               <div className="flex-grow">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <AnimatedCircularProgress value={project.projectHealth} />
-                  <CardTitle>{project.name}</CardTitle>
+                  {/* <AnimatedCircularProgress value={project.projectHealth} /> */}
+                  <CardTitle className="text-2xl font-bold">
+                    {project.name}
+                  </CardTitle>
+
                   <div className="flex items-center space-x-2">
-                    <Button
+                    <GoalSettingModal
+                      projectId={project.id}
+                      fetchProjects={fetchProjects}
+                    />
+                    {/* <Button
                       variant="ghost"
                       size="sm"
                       onClick={() => openNotesModal(project.id)}
                     >
                       <Notebook className="w-4 h-4" />
-                    </Button>
+                    </Button> */}
                     {hasEnoughDataForChart(project.tasks) && (
                       <TooltipProvider>
                         <Tooltip delayDuration={0}>
@@ -677,7 +691,7 @@ const Component = () => {
                 <CardContent>
                   <div className="flex items-center space-x-2 mb-4">
                     <Switch
-                      id={`show-completed-${project.id}`}
+                      id={`show-completed-${project._id}`}
                       checked={project.showCompleted}
                       onCheckedChange={() => toggleShowCompleted(project.id)}
                     />
@@ -687,9 +701,12 @@ const Component = () => {
                         : "Showing to-do"}
                     </Label>
                   </div>
-                  {project.name === "Comicfy" && (
+                  {project.goals && (
                     <>
-                      <div className="flex items-center space-x-2">
+                      <div
+                        className="flex items-center space-x-2"
+                        style={{ marginTop: "30px" }}
+                      >
                         <Target className="h-5 w-5 text-purple-500" />
                         <span className="font-semibold">Project Goal</span>
                       </div>
@@ -701,7 +718,7 @@ const Component = () => {
                       </p>
                     </>
                   )}
-                  <ul className="space-y-6">
+                  <ul className="space-y-6" style={{ marginTop: "30px" }}>
                     {project.tasks
                       .filter(
                         (task) => task.completed === project.showCompleted
