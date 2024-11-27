@@ -47,6 +47,7 @@ export async function POST(req: Request) {
     // Step 2: Push the new goal into the `goals` array
     const updateResult = await db.collection("projects").updateOne(
       { _id: new ObjectId(projectId) },
+      // @ts-expect-error - TypeScript doesn't recognize the $push operator
       { $push: { goals: newGoal } } // Add the new goal
     );
 
