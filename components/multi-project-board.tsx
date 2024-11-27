@@ -688,7 +688,7 @@ const Component = () => {
                         : "Showing to-do"}
                     </Label>
                   </div>
-                  {project.goals && (
+                  {project.goals?.length > 0 && (
                     <>
                       <div
                         className="flex items-center space-x-2"
@@ -701,7 +701,7 @@ const Component = () => {
                         className="text-sm text-muted-foreground"
                         style={{ marginBottom: "10px" }}
                       >
-                        {project.goals[0]?.title || ""}
+                        {project.goals[0]?.title}
                       </p>
                     </>
                   )}
