@@ -1,23 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, KeyboardEvent } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  PlusCircle,
-  Pencil,
-  Trash2,
-  Notebook,
-  NotebookPen,
-  Target,
-} from "lucide-react";
+import { PlusCircle, Pencil, Trash2, NotebookPen, Target } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -26,7 +13,7 @@ import Confetti from "react-confetti";
 import StaleTasksButton from "./ui/StaleTasksButton";
 import NotesModal from "./ui/NotesModal";
 import PrioritizeButton from "./ui/PrioritizeButton";
-import AnimatedCircularProgress from "./ui/AnimatedCircularProgress";
+
 import TaskNotesModal from "./ui/TaskNotesModal";
 
 import { SelectRecurrence } from "./SelectRecurrence";
@@ -240,10 +227,10 @@ const Component = () => {
     }
   };
 
-  const openNotesModal = (projectId: string) => {
-    setCurrentProjectId(projectId);
-    setIsNotesModalOpen(true);
-  };
+  // const openNotesModal = (projectId: string) => {
+  //   setCurrentProjectId(projectId);
+  //   setIsNotesModalOpen(true);
+  // };
   const fetchProjects = async () => {
     try {
       console.log("fetching projects");
