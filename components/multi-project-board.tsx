@@ -701,7 +701,7 @@ const Component = () => {
                         className="text-sm text-muted-foreground"
                         style={{ marginBottom: "10px" }}
                       >
-                        {project.goals[0].title}
+                        {project.goals[0]?.title || ""}
                       </p>
                     </>
                   )}
