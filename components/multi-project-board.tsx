@@ -710,6 +710,7 @@ const Component = () => {
                       .filter(
                         (task) => task.completed === project.showCompleted
                       )
+                      .slice(0, 1)
                       .map((task) => (
                         <li
                           key={task.id}
