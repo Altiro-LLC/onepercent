@@ -92,7 +92,7 @@ const PrioritizeTasks: React.FC<PrioritizeButtonProps> = ({
   const handleSave = async () => {
     setSaveStatus("saving"); // Indicate saving process has started
     try {
-      const updatedTasks = taskList.map((task, index) => ({
+      const updatedTasks = taskList?.map((task, index) => ({
         id: task.id,
         priority: index + 10, // Assign new priorities based on the list order
       }));
@@ -120,7 +120,9 @@ const PrioritizeTasks: React.FC<PrioritizeButtonProps> = ({
 
   useEffect(() => {
     // Sort projects by their priority
-    const sortedTasksByPriority = tasks.sort((a, b) => a.priority - b.priority);
+    const sortedTasksByPriority = tasks?.sort(
+      (a, b) => a.priority - b.priority
+    );
     setTaskList(sortedTasksByPriority);
   }, [tasks]);
 
@@ -151,7 +153,7 @@ const PrioritizeTasks: React.FC<PrioritizeButtonProps> = ({
               items={taskList}
               strategy={verticalListSortingStrategy}
             >
-              {taskList.map((project) => (
+              {taskList?.map((project) => (
                 <SortableItem key={project.id} id={project.id}>
                   <div className="font-medium">{project.title}</div>
                 </SortableItem>

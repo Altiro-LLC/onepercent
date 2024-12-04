@@ -83,6 +83,7 @@ export async function POST(req: Request) {
       lastCompletionDate: null,
       showCompleted: false,
       goals: [],
+      backlog: [],
     };
 
     const result = await db.collection("projects").insertOne(newProject);
