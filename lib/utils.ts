@@ -44,6 +44,7 @@ export function populateRecurringTasks(project: Project) {
         createdAt: new Date(),
         lastUpdated: new Date(),
         completedAt: null,
+        priority: 0, // TODO: change this? Get the latest priority and increment it?
       };
 
       project.tasks.push(newTask); // Add new task to tasks array

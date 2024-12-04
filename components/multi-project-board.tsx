@@ -31,6 +31,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GoalSettingModal } from "./GoalSettingModal";
+import PrioritizeTasks from "./PrioritizeTasks";
 
 export interface Task {
   id: string;
@@ -41,6 +42,7 @@ export interface Task {
   lastUpdated?: Date; // Updated whenever the task is edited
   recurringTaskId?: string;
   notes?: string;
+  priority: number;
 }
 
 export interface RecurringTask {
@@ -78,6 +80,7 @@ export interface Project {
   recurringTasks: RecurringTask[];
   projectHealth: number;
   goals: Goal[];
+  backlog: Task[];
 }
 
 function isTaskStale(task: Task): boolean {
@@ -644,6 +647,11 @@ const Component = () => {
                   </CardTitle>
 
                   <div className="flex items-center space-x-2">
+                    <PrioritizeTasks
+                      projectId={project.id}
+                      tasks={project.backlog}
+                      fetchProjects={fetchProjects}
+                    />
                     <GoalSettingModal
                       projectId={project.id}
                       fetchProjects={fetchProjects}
