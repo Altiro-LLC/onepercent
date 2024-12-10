@@ -11,12 +11,13 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Activity, BarChart2, Flame, Target } from "lucide-react";
+import { Task } from "@/lib/types";
 
-interface Task {
-  id: string;
-  description: string;
-  completed: boolean;
-}
+// interface Task {
+//   id: string;
+//   description: string;
+//   completed: boolean;
+// }
 
 interface ProjectCardProps {
   name: string;
@@ -90,7 +91,7 @@ export default function ProjectCard({
                     task.completed ? "line-through text-muted-foreground" : ""
                   }`}
                 >
-                  {task.description}
+                  {task.title}
                 </label>
               </div>
             ))}

@@ -100,3 +100,15 @@ export function hasEnoughDataForChart(tasks: Task[]): boolean {
   // Return true if we have data for at least 3 different days in the last 2 weeks
   return uniqueCompletionDates.size >= 3;
 }
+export function isTaskStale(task: Task): boolean {
+  const now = new Date();
+  const lastUpdate = task.lastUpdated
+    ? new Date(task.lastUpdated)
+    : new Date(task.createdAt);
+
+  // Calculate the difference in days between now and the last update date.
+  const differenceInTime = now.getTime() - lastUpdate.getTime();
+  const differenceInDays = differenceInTime / (1000 * 3600 * 24); // Convert milliseconds to days
+
+  return differenceInDays > 5 && !task.completed;
+}
