@@ -3,14 +3,6 @@
 import { Project } from "@/lib/types";
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 
-// Types for project state
-
-// interface ProjectState {
-//   projects: Project[];
-//   status: "idle" | "loading" | "succeeded" | "failed";
-//   error: string | null;
-// }
-
 // Initial state
 const initialState: {
   projects: Project[];

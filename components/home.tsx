@@ -20,7 +20,7 @@ import { fetchProjects } from "@/app/slices/projectSlice";
 import ProjectCard from "./ProjectCard";
 // import { Project } from "@/lib/types";
 import { AppDispatch, RootState } from "@/app/store/store";
-import { Project } from "@/lib/types";
+// import { Project } from "@/lib/types";
 
 export interface Task {
   id: string;
@@ -71,6 +71,7 @@ const Component = () => {
     if (userId) dispatch(fetchProjects(userId));
   }, [dispatch]);
   console.log("proje", projects);
+
   return (
     <div className="container mx-auto p-4">
       {/* {isConfetti && <Confetti tweenDuration={3000} />} */}
@@ -100,23 +101,93 @@ const Component = () => {
       </div>
       <ScrollArea className="h-[calc(100vh-12rem)]">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projects.map((project: Project) => {
-            return (
-              <ProjectCard
-                key={project._id}
-                name={project.name}
-                health={project.health}
-                streak={project.streak}
-                analytics={project.analytics}
-                goal={
-                  project.goals.length > 0 ? project.goals[0].name : "No goals"
-                }
-                dailyTasks={
-                  project.goals.length > 0 ? project.goals[0].tasks : []
-                }
-              />
-            );
-          })}
+          <ProjectCard
+            key={"project._id"}
+            name={"OnePercent"}
+            health={50}
+            streak={25}
+            analytics={{
+              views: 100,
+              conversions: 10,
+            }}
+            goal={"Get Customer Feedback"}
+            dailyTasks={[
+              {
+                id: "task_1",
+                title: "Regular Task 1",
+                isRecurring: false,
+                completed: true,
+                priority: 1,
+                tag: "general",
+              },
+              {
+                id: "task_1",
+                title: "Regular Task 1",
+                isRecurring: false,
+                completed: false,
+                priority: 1,
+                tag: "general",
+              },
+            ]}
+          />
+          <ProjectCard
+            key={"project._id"}
+            name={"Comicfy"}
+            health={50}
+            streak={25}
+            analytics={{
+              views: 100,
+              conversions: 10,
+            }}
+            goal={"Get Customer Feedback"}
+            dailyTasks={[
+              {
+                id: "task_1",
+                title: "Regular Task 1",
+                isRecurring: false,
+                completed: false,
+                priority: 1,
+                tag: "general",
+              },
+              {
+                id: "task_1",
+                title: "Regular Task 1",
+                isRecurring: false,
+                completed: true,
+                priority: 1,
+                tag: "general",
+              },
+            ]}
+          />
+          <ProjectCard
+            key={"project._id"}
+            name={"Project Name"}
+            health={50}
+            streak={25}
+            analytics={{
+              views: 100,
+              conversions: 10,
+            }}
+            goal={"Get Customer Feedback"}
+            dailyTasks={[
+              {
+                id: "task_1",
+                title: "Regular Task 1",
+                isRecurring: false,
+                completed: false,
+                priority: 1,
+                tag: "general",
+              },
+              {
+                id: "task_1",
+                title: "Regular Task 1",
+                isRecurring: false,
+                completed: true,
+                priority: 1,
+                tag: "general",
+              },
+            ]}
+          />
         </div>
       </ScrollArea>
     </div>
